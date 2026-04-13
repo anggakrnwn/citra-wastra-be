@@ -1,0 +1,36 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+out/
+dist/
+
+# Spec name compile add
+main
+citra-wastra-be
+
+# env
+.env
+.env.local
+.env.*.local
+
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# Docker
+.docker/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+obj/

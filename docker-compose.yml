@@ -1,0 +1,16 @@
+services:
+  db_citra_wastra:
+    image: postgres:16-alpine
+    container_name: citra_wastra_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - citra_wastra_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  citra_wastra_data:
