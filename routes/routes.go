@@ -22,19 +22,7 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler 
 		protected := api.Group("/user")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			// test dummy
-			protected.GET("/ping", func(ctx *gin.Context) {
-				userID := ctx.MustGet(middleware.UserIDKey).(string)
-				role := ctx.MustGet(middleware.RoleKey).(string)
-
-				ctx.JSON(200, gin.H{
-					"message": "Pong! Token kamu valid.",
-					"data": gin.H{
-						"user_id": userID,
-						"role":    role,
-					},
-				})
-			})
+			protected.GET("/me", authHandler.GetProfile)
 		}
 	}
 }

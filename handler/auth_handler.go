@@ -2,7 +2,7 @@ package handler
 
 import (
 	"citra-wastra-be/dto"
-	"citra-wastra-be/models"
+	"citra-wastra-be/middleware"
 	"citra-wastra-be/service"
 	"citra-wastra-be/utils"
 	"errors"
@@ -32,13 +32,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user := models.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	if err := h.service.Register(&user); err != nil {
+	userResponse, err := h.service.Register(req)
+	if err != nil {
 		if errors.Is(err, service.ErrEmailTaken) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
@@ -47,16 +42,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	response := dto.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
-	}
-
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User created successfully!",
-		"data":    response,
+		"data":    userResponse,
 	})
 
 }
@@ -72,7 +60,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.service.Login(input.Email, input.Password)
+	loginResponse, err := h.service.Login(input)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidConfig) {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -84,20 +72,26 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	userResponse := dto.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
-	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful!",
+		"data":    loginResponse,
+	})
+}
 
-	response := dto.LoginResponse{
-		Token: token,
-		Data:  userResponse,
+func (h *AuthHandler) GetProfile(c *gin.Context) {
+	userID := c.MustGet(middleware.UserIDKey).(string)
+
+	userResponse, err := h.service.GetProfile(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "User not found",
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful!",
-		"data":    response,
+		"status":  "success",
+		"message": "User profile retrieved successfully",
+		"data":    userResponse,
 	})
 }
