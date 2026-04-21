@@ -6,6 +6,7 @@ import (
 	"citra-wastra-be/service"
 	"citra-wastra-be/utils"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		formattedErrors := utils.FormatValidationError(err, &req)
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Validation failed",
+			"success": false,
+			"error":   "validation failed",
 			"details": formattedErrors,
 		})
 		return
@@ -34,16 +36,25 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	userResponse, err := h.service.Register(req)
 	if err != nil {
-		if errors.Is(err, service.ErrEmailTaken) {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
+		switch {
+		case errors.Is(err, service.ErrEmailTaken):
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"error":   "email already registered",
+			})
+		default:
+			log.Printf("auth register error (email=%s): %v", req.Email, err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   "registration failed",
+			})
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Registration failed"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User created successfully!",
+		"success": true,
+		"message": "user created successfully",
 		"data":    userResponse,
 	})
 
@@ -55,43 +66,69 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err := c.ShouldBindJSON(&input); err != nil {
 		formattedErrors := utils.FormatValidationError(err, &input)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": formattedErrors,
+			"success": false,
+			"error":   "validation failed",
+			"details": formattedErrors,
 		})
 		return
 	}
 
 	loginResponse, err := h.service.Login(input)
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidConfig) {
+		switch {
+		case errors.Is(err, service.ErrInvalidCredentials):
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
+				"success": false,
+				"error":   "invalid email or password",
 			})
-			return
+		default:
+			log.Printf("auth login error (email=%s): %v", input.Email, err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   "login failed",
+			})
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login failed"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful!",
+		"success": true,
+		"message": "login successful",
 		"data":    loginResponse,
 	})
 }
 
 func (h *AuthHandler) GetProfile(c *gin.Context) {
-	userID := c.MustGet(middleware.UserIDKey).(string)
+	val, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	userID, ok := val.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "invalid user id",
+		})
+		return
+	}
 
 	userResponse, err := h.service.GetProfile(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"error": "User not found",
+			"success": false,
+			"error":   "user not found",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"message": "User profile retrieved successfully",
+		"success": true,
+		"message": "profile retrieved successfully",
 		"data":    userResponse,
 	})
 }

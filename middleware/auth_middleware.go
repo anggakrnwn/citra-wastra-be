@@ -11,25 +11,21 @@ import (
 const (
 	UserIDKey = "user_id"
 	RoleKey   = "role"
+
+	errInvalidTokenPayload = "invalid token payload"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Authorization header is required",
-			})
-			ctx.Abort()
+			abortWithError(ctx, http.StatusUnauthorized, "authorization header is required")
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid authorization format",
-			})
-			ctx.Abort()
+			abortWithError(ctx, http.StatusBadRequest, "invalid authorization format")
 			return
 		}
 
@@ -37,16 +33,33 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, err := utils.ValidateToken(tokenString)
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid or expired token",
-			})
-			ctx.Abort()
+			abortWithError(ctx, http.StatusUnauthorized, "invalid or expired token")
 			return
 		}
 
-		ctx.Set("user_id", claims["user_id"])
-		ctx.Set("role", claims["role"])
+		userID, ok := claims["user_id"].(string)
+		if !ok {
+			abortWithError(ctx, http.StatusUnauthorized, errInvalidTokenPayload)
+			return
+		}
+
+		role, ok := claims["role"].(string)
+		if !ok {
+			abortWithError(ctx, http.StatusUnauthorized, errInvalidTokenPayload)
+			return
+		}
+
+		ctx.Set(UserIDKey, userID)
+		ctx.Set(RoleKey, role)
 
 		ctx.Next()
 	}
+}
+
+func abortWithError(ctx *gin.Context, status int, msg string) {
+	ctx.JSON(status, gin.H{
+		"success": false,
+		"error":   msg,
+	})
+	ctx.Abort()
 }

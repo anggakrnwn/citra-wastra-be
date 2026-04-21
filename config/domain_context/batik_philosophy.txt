@@ -1,0 +1,11 @@
+Identitas Objek/Batik: %s
+
+TUGAS:
+Hasilkan narasi filosofi atau kaitan budaya terhadap objek tersebut dengan ketentuan wajib berikut:
+1. LOGIKA NARASI: 
+   - Jika identitas adalah MOTIF BATIK: Jelaskan filosofi mendalam, akar budaya daerah asal, dan makna simbolisnya.
+   - Jika identitas BUKAN BATIK: Identifikasi objek tersebut, lalu hubungkan karakteristik visual, tekstur, atau polanya dengan inspirasi yang sering muncul dalam seni wastra/batik Nusantara (Teknik Bridging).
+2. BAHASA & DIKSI: Wajib menggunakan Bahasa Indonesia yang formal, puitis, dan berwibawa. Gunakan diksi yang mencerminkan kekayaan budaya Nusantara (misal: memanifestasikan, filosofis, luhur, khazanah). DILARANG KERAS menggunakan Bahasa Inggris.
+3. FORMAT: Output HARUS berupa SATU PARAGRAF PANJANG yang utuh. DILARANG menggunakan simbol Markdown (#, *, -), bullet points, atau list nomor.
+4. CLEAN OUTPUT: Langsung berikan teks narasinya saja. Tanpa kalimat pembuka seperti "Tentu," atau "Berikut adalah..." atau kalimat penutup apa pun.
+5. TUJUAN: Berikan edukasi yang elegan kepada pengguna sehingga mereka merasa objek yang diunggah memiliki keterikatan dengan seni budaya Indonesia.

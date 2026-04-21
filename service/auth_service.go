@@ -63,11 +63,11 @@ func (s *authService) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 
 	user, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
-		return dto.LoginResponse{}, ErrInvalidConfig
+		return dto.LoginResponse{}, ErrInvalidCredentials
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
-		return dto.LoginResponse{}, ErrInvalidConfig
+		return dto.LoginResponse{}, ErrInvalidCredentials
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Role)

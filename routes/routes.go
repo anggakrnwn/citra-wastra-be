@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler *handler.HealthHandler) {
+func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler *handler.HealthHandler, batikHandler *handler.BatikHandler) {
 
 	r.GET("/health", healthHandler.Check)
 
@@ -19,10 +19,11 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler 
 			auth.POST("/login", authHandler.Login)
 		}
 
-		protected := api.Group("/user")
+		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			protected.GET("/me", authHandler.GetProfile)
+			protected.GET("/user/me", authHandler.GetProfile)
+			protected.POST("/batik/detect", batikHandler.Detect)
 		}
 	}
 }
