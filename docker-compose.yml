@@ -11,6 +11,12 @@ services:
     volumes:
       - citra_wastra_data:/var/lib/postgresql/data
     restart: unless-stopped
+  redis:
+    image: redis:alpine
+    container_name: cw-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
 
 volumes:
   citra_wastra_data:

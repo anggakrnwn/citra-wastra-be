@@ -48,7 +48,7 @@ func (h *BatikHandler) Detect(c *gin.Context) {
 		File: file,
 	}
 
-	result, err := h.service.DetectBatik(userID, req)
+	result, err := h.service.DetectBatik(c.Request.Context(), userID, req)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrImageUpload):

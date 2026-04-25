@@ -19,6 +19,7 @@ import (
 func main() {
 
 	db := config.InitDB()
+	rdb := config.InitRedis()
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
@@ -42,7 +43,8 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 
 	batikRepo := repository.NewBatikRepository(db)
-	batikService := service.NewBatikService(batikRepo, narrator, uploader, classifier)
+	cacheRepo := repository.NewBatikCacheRepository(rdb)
+	batikService := service.NewBatikService(batikRepo, cacheRepo, narrator, uploader, classifier)
 	batikHandler := handler.NewBatikHandler(batikService)
 
 	utils.StartKeepAlive()
