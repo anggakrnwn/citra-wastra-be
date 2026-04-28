@@ -7,6 +7,7 @@ import (
 	"citra-wastra-be/routes"
 	"citra-wastra-be/service"
 	"citra-wastra-be/utils"
+	"citra-wastra-be/worker"
 	"context"
 	"log"
 	"os"
@@ -36,21 +37,42 @@ func main() {
 	}
 	classifier := utils.NewClassifier()
 
-	// DI
-	healthHandler := handler.NewHealthHandler(db)
+	// DI - repo
 	userRepo := repository.NewUserRepository(db)
-	authService := service.NewAuthService(userRepo)
-	authHandler := handler.NewAuthHandler(authService)
-
 	batikRepo := repository.NewBatikRepository(db)
+	badgeRepo := repository.NewBadgeRepository(db)
+
+	// redis
 	cacheRepo := repository.NewBatikCacheRepository(rdb)
-	batikService := service.NewBatikService(batikRepo, cacheRepo, narrator, uploader, classifier)
+	queueRepo := repository.NewQueueRepository(rdb)
+	gamificationRepo := repository.NewGamificationRepository(rdb)
+
+	// DI - service
+	gamificationService := service.NewGamificationService(badgeRepo, gamificationRepo, userRepo, rdb)
+	authService := service.NewAuthService(userRepo)
+	batikService := service.NewBatikService(
+		batikRepo,
+		cacheRepo,
+		queueRepo,
+		gamificationService,
+		narrator,
+		uploader,
+		classifier)
+
+	// worker
+	xpWorker := worker.NewXPWorker(gamificationService, queueRepo)
+	go xpWorker.Start(context.Background())
+
+	// DI - handler
+	healthHandler := handler.NewHealthHandler(db)
+	authHandler := handler.NewAuthHandler(authService)
 	batikHandler := handler.NewBatikHandler(batikService)
-
+	gamificationHandler := handler.NewGamificationHandler(gamificationService, gamificationRepo)
+	// router
 	utils.StartKeepAlive()
-
 	router := gin.Default()
-	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler)
+
+	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler)
 
 	router.Run()
 }

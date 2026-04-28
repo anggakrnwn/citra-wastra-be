@@ -10,6 +10,7 @@ type UserRepository interface {
 	Create(user *models.User) error
 	FindByEmail(email string) (*models.User, error)
 	FindByID(ID string) (*models.User, error)
+	UpdateTotalXP(userID string, totalXP int) error
 }
 
 type userRepository struct {
@@ -34,4 +35,8 @@ func (r *userRepository) FindByID(id string) (*models.User, error) {
 	var user models.User
 	err := r.db.First(&user, "id = ?", id).Error
 	return &user, err
+}
+
+func (r *userRepository) UpdateTotalXP(userID string, totalXP int) error {
+	return r.db.Model(&models.User{}).Where("id = ?", userID).Update("xp", totalXP).Error
 }

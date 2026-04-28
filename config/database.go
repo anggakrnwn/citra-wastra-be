@@ -1,6 +1,7 @@
 package config
 
 import (
+	"citra-wastra-be/config/database"
 	"citra-wastra-be/models"
 	"fmt"
 	"log"
@@ -49,6 +50,8 @@ func InitDB() *gorm.DB {
 	}
 
 	fmt.Println("DB migrasi sukses!")
+
+	database.SeedAll(db)
 
 	return db
 }

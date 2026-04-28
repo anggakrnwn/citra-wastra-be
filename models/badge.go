@@ -16,6 +16,7 @@ type UserBadge struct {
 	ID         string    `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	UserID     string    `gorm:"type:uuid;not null;index" json:"user_id"`
 	BadgeID    string    `gorm:"type:uuid;not null" json:"badge_id"`
+	IsEquipped bool      `gorm:"default:false" json:"is_equipped"`
 	AchievedAt time.Time `json:"achieved_at"`
 
 	Badge Badge `gorm:"foreignKey:BadgeID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"badge_details"`
