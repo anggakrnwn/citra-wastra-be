@@ -11,6 +11,8 @@ import (
 	"log"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -24,26 +26,32 @@ type BatikService interface {
 }
 
 type batikService struct {
-	repo       repository.BatikRepository
-	cacheRepo  repository.BatikCacheRepository
-	narrator   NarratorInterface
-	uploader   ImageUploader
-	classifier BatikClassifier
+	repo          repository.BatikRepository
+	cacheRepo     repository.BatikCacheRepository
+	queueRepo     repository.QueueRepository
+	narrator      NarratorInterface
+	uploader      ImageUploader
+	classifier    BatikClassifier
+	gammification GamificationService
 }
 
 func NewBatikService(
 	repo repository.BatikRepository,
 	cacheRepo repository.BatikCacheRepository,
+	queueRepo repository.QueueRepository,
+	gammification GamificationService,
 	narrator NarratorInterface,
 	uploader ImageUploader,
 	classifier BatikClassifier,
 ) BatikService {
 	return &batikService{
-		repo:       repo,
-		cacheRepo:  cacheRepo,
-		narrator:   narrator,
-		uploader:   uploader,
-		classifier: classifier,
+		repo:          repo,
+		cacheRepo:     cacheRepo,
+		queueRepo:     queueRepo,
+		gammification: gammification,
+		narrator:      narrator,
+		uploader:      uploader,
+		classifier:    classifier,
 	}
 }
 
@@ -67,12 +75,12 @@ func (s *batikService) DetectBatik(ctx context.Context, userID string, req dto.U
 	if folderName == "" {
 		folderName = "default-batik"
 	}
-	imageURL, err := s.uploader.UploadImage(req.File, folderName)
+	imageURL, err := s.uploader.UploadImage(ctx, req.File, folderName)
 	if err != nil {
 		return dto.BatikResponse{}, fmt.Errorf("cloudinary upload failed: %v", err)
 	}
 
-	label, confidence, philosophy, err := s.classifier.ClassifyBatik(imageURL)
+	label, confidence, philosophy, err := s.classifier.ClassifyBatik(ctx, imageURL)
 	if err != nil {
 		return dto.BatikResponse{}, fmt.Errorf("ai classification failed: %v", err)
 	}
@@ -122,6 +130,17 @@ func (s *batikService) DetectBatik(ctx context.Context, userID string, req dto.U
 
 	if err := s.cacheRepo.Set(ctx, cacheKey, response, CacheDuration); err != nil {
 		log.Printf("warning: failed to set cache: %v", err)
+	}
+
+	payload := dto.XPJobPayload{
+		JobID:  uuid.NewString(),
+		UserID: userID,
+		XPGain: 100,
+		Retry:  0,
+	}
+
+	if err := s.queueRepo.EnqueueXPJob(ctx, payload); err != nil {
+		log.Printf("failed to increment XP: %v", err)
 	}
 
 	return response, nil

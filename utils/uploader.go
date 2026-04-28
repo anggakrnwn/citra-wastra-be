@@ -23,9 +23,8 @@ func NewUploader() (*cloudinaryUploader, error) {
 
 }
 
-func (u *cloudinaryUploader) UploadImage(fileHeader *multipart.FileHeader, folder string) (string, error) {
+func (u *cloudinaryUploader) UploadImage(ctx context.Context, fileHeader *multipart.FileHeader, folder string) (string, error) {
 
-	ctx := context.Background()
 	file, err := fileHeader.Open()
 	if err != nil {
 		return "", err

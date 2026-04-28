@@ -7,7 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler *handler.HealthHandler, batikHandler *handler.BatikHandler) {
+func SetupRoutes(
+	r *gin.Engine,
+	authHandler *handler.AuthHandler,
+	healthHandler *handler.HealthHandler,
+	batikHandler *handler.BatikHandler,
+	gamificationHandler *handler.GamificationHandler,
+) {
 
 	r.GET("/health", healthHandler.Check)
 
@@ -24,6 +30,8 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, healthHandler 
 		{
 			protected.GET("/user/me", authHandler.GetProfile)
 			protected.POST("/batik/detect", batikHandler.Detect)
+			protected.GET("/profile/badges", gamificationHandler.GetMyBadges)
+			protected.POST("/profile/badges/equip", gamificationHandler.EquipBadge)
 		}
 	}
 }

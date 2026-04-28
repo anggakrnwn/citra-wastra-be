@@ -17,7 +17,7 @@ type aiClassifier struct{}
 
 func NewClassifier() *aiClassifier { return &aiClassifier{} }
 
-func (c *aiClassifier) ClassifyBatik(imageURL string) (string, float64, string, error) {
+func (c *aiClassifier) ClassifyBatik(ctx context.Context, imageURL string) (string, float64, string, error) {
 	baseURL := strings.TrimRight(os.Getenv("AI_MODEL_URL"), "/")
 	apiKey := os.Getenv("AI_MODEL_TOKEN")
 
