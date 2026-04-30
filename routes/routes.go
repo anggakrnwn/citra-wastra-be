@@ -15,6 +15,7 @@ func SetupRoutes(
 	gamificationHandler *handler.GamificationHandler,
 	learningHandler *handler.LearningHandler,
 	adminHandler *handler.AdminHandler,
+	superAdminHandler *handler.SuperAdminHandler,
 ) {
 
 	r.GET("/health", healthHandler.Check)
@@ -76,6 +77,22 @@ func SetupRoutes(
 			admin.GET("/users", adminHandler.GetAllUsers)
 			admin.GET("/batik/logs", adminHandler.GetDetectionLogs)
 			admin.GET("/health", adminHandler.GetSystemHealth)
+		}
+
+		superAdmin := api.Group("/super-admin")
+		superAdmin.Use(middleware.AuthMiddleware(), middleware.SuperAdminMiddleware())
+		{
+			// Admin & User Management
+			superAdmin.POST("/admins", superAdminHandler.CreateAdmin)
+			superAdmin.PUT("/users/:id/status", superAdminHandler.UpdateUserStatus)
+			superAdmin.PUT("/users/:id/role", superAdminHandler.UpdateUserRole)
+
+			// System Configuration
+			superAdmin.GET("/config", superAdminHandler.GetAllConfigs)
+			superAdmin.PUT("/config", superAdminHandler.UpdateConfig)
+
+			// Audit Logs
+			superAdmin.GET("/audit-logs", superAdminHandler.GetAuditLogs)
 		}
 	}
 }

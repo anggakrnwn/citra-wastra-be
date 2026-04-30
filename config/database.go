@@ -48,6 +48,8 @@ func InitDB() *gorm.DB {
 		&models.Level{},
 		&models.UserLevelProgress{},
 		&models.Question{},
+		&models.AuditLog{},
+		&models.SystemConfig{},
 	)
 
 	if err != nil {

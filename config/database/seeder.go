@@ -2,6 +2,7 @@ package database
 
 import (
 	"citra-wastra-be/models"
+	"log"
 	"os"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,33 +10,52 @@ import (
 )
 
 func SeedAll(db *gorm.DB) {
+	log.Println("running database seeder...")
 	SeedAdmin(db)
 	SeedBadges(db)
 	SeedLearningPath(db)
 	SeedQuestions(db)
+	log.Println("seeder completed.")
 }
 
 func SeedAdmin(db *gorm.DB) {
 	adminPass := os.Getenv("ADMIN_PASSWORD")
+	superPass := os.Getenv("SUPER_ADMIN_PASSWORD")
 
-	if adminPass == "" {
-		panic("ADMIN_PASSWORD environment variable is not set!")
+	if adminPass == "" || superPass == "" {
+		log.Println("warning: ADMIN_PASSWORD or SUPER_ADMIN_PASSWORD not set. skipping admin seeding.")
+		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPass), 10)
-	if err != nil {
-		panic("failed to hash admin password: " + err.Error())
-	}
-
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(adminPass), 10)
 	admin := models.User{
-		ID:       "00000000-0000-0000-0000-000000000000",
+		ID:       "00000000-0000-0000-0000-000000000001",
 		Username: "admin",
 		Email:    "admin@citrawastra.com",
 		Password: string(hashedPassword),
 		Role:     "admin",
+		IsActive: true,
+	}
+	if err := db.Save(&admin).Error; err != nil {
+		log.Printf("failed to seed admin: %v", err)
+	} else {
+		log.Printf("admin user ready: %s", admin.Email)
 	}
 
-	db.FirstOrCreate(&admin, models.User{Username: "admin"})
+	hashedSuperPassword, _ := bcrypt.GenerateFromPassword([]byte(superPass), 10)
+	superAdmin := models.User{
+		ID:       "00000000-0000-0000-0000-000000000000",
+		Username: "superadmin",
+		Email:    "superadmin@citrawastra.com",
+		Password: string(hashedSuperPassword),
+		Role:     "super_admin",
+		IsActive: true,
+	}
+	if err := db.Save(&superAdmin).Error; err != nil {
+		log.Printf("failed to seed super admin: %v", err)
+	} else {
+		log.Printf("super admin user ready: %s", superAdmin.Email)
+	}
 }
 func SeedBadges(db *gorm.DB) {
 	badges := []models.Badge{
@@ -128,7 +148,7 @@ func SeedLearningPath(db *gorm.DB) {
 func SeedQuestions(db *gorm.DB) {
 	questions := []models.Question{
 		{
-			ID:       "q1-gentongan",
+			ID:       "11111111-1111-4111-b111-111111111111",
 			LevelID:  "11111111-1111-4111-a111-111111111111",
 			Question: "Apa wadah unik yang digunakan untuk merendam kain Batik Gentongan?",
 			OptionA:  "Ember Plastik",
@@ -138,7 +158,7 @@ func SeedQuestions(db *gorm.DB) {
 			Correct:  "B",
 		},
 		{
-			ID:       "q2-barong",
+			ID:       "22222222-2222-4222-b222-222222222222",
 			LevelID:  "22222222-2222-4222-a222-222222222222",
 			Question: "Motif Barong dalam budaya Bali melambangkan simbol apa?",
 			OptionA:  "Kekayaan Materi",
@@ -148,7 +168,7 @@ func SeedQuestions(db *gorm.DB) {
 			Correct:  "C",
 		},
 		{
-			ID:       "q3-aceh",
+			ID:       "33333333-3333-4333-b333-333333333333",
 			LevelID:  "33333333-3333-4333-a333-333333333333",
 			Question: "Motif Pintu Aceh terinspirasi dari pintu rumah adat yang rendah. Apa maknanya?",
 			OptionA:  "Kesantunan dan Rendah Hati",
@@ -158,7 +178,7 @@ func SeedQuestions(db *gorm.DB) {
 			Correct:  "A",
 		},
 		{
-			ID:       "q5-kawung",
+			ID:       "55555555-5555-4555-b555-555555555555",
 			LevelID:  "55555555-5555-4555-a555-555555555555",
 			Question: "Filosofi 'Sedulur Papat Limo Pancer' pada motif Kawung melambangkan...",
 			OptionA:  "Empat Musim di Dunia",

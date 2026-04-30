@@ -5,31 +5,32 @@ import (
 	"citra-wastra-be/models"
 	"citra-wastra-be/repository"
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 )
 
 type AdminService interface {
 	// CMS - Levels
-	CreateLevel(req dto.AdminLevelRequest) error
-	UpdateLevel(id string, req dto.AdminLevelRequest) error
-	DeleteLevel(id string) error
+	CreateLevel(adminID, ip string, req dto.AdminLevelRequest) error
+	UpdateLevel(adminID, id, ip string, req dto.AdminLevelRequest) error
+	DeleteLevel(adminID, id, ip string) error
 
 	// CMS - Questions
-	CreateQuestion(req dto.AdminQuestionRequest) error
-	UpdateQuestion(id string, req dto.AdminQuestionRequest) error
-	DeleteQuestion(id string) error
+	CreateQuestion(adminID, ip string, req dto.AdminQuestionRequest) error
+	UpdateQuestion(adminID, id, ip string, req dto.AdminQuestionRequest) error
+	DeleteQuestion(adminID, id, ip string) error
 
 	// CMS - Batik Catalog
-	CreateCatalog(adminID string, req dto.AdminCatalogRequest) error
-	UpdateCatalog(id string, req dto.AdminCatalogRequest) error
-	DeleteCatalog(id string) error
+	CreateCatalog(adminID, ip string, req dto.AdminCatalogRequest) error
+	UpdateCatalog(adminID, id, ip string, req dto.AdminCatalogRequest) error
+	DeleteCatalog(adminID, id, ip string) error
 	GetAllCatalog() ([]models.BatikCatalog, error)
 
 	// CMS - Badges
-	CreateBadge(req dto.AdminBadgeRequest) error
-	UpdateBadge(id string, req dto.AdminBadgeRequest) error
-	DeleteBadge(id string) error
+	CreateBadge(adminID, ip string, req dto.AdminBadgeRequest) error
+	UpdateBadge(adminID, id, ip string, req dto.AdminBadgeRequest) error
+	DeleteBadge(adminID, id, ip string) error
 
 	// Monitoring
 	GetAllUsers(page, limit int) ([]dto.AdminUserResponse, int64, error)
@@ -42,6 +43,7 @@ type adminService struct {
 	learningRepo repository.LearningRepository
 	batikRepo    repository.BatikRepository
 	badgeRepo    repository.BadgeRepository
+	systemRepo   repository.SystemRepository
 	queueRepo    repository.QueueRepository
 }
 
@@ -50,12 +52,24 @@ func NewAdminService(
 	learningRepo repository.LearningRepository,
 	batikRepo repository.BatikRepository,
 	badgeRepo repository.BadgeRepository,
+	systemRepo repository.SystemRepository,
 	queueRepo repository.QueueRepository,
 ) AdminService {
-	return &adminService{userRepo, learningRepo, batikRepo, badgeRepo, queueRepo}
+	return &adminService{userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo}
 }
 
-func (s *adminService) CreateLevel(req dto.AdminLevelRequest) error {
+func (s *adminService) LogActivity(adminID, action, target, details, ip string) {
+	log := &models.AuditLog{
+		AdminID:   adminID,
+		Action:    action,
+		Target:    target,
+		Details:   details,
+		IPAddress: ip,
+	}
+	s.systemRepo.CreateAuditLog(log)
+}
+
+func (s *adminService) CreateLevel(adminID, ip string, req dto.AdminLevelRequest) error {
 	level := &models.Level{
 		ID:       uuid.NewString(),
 		ModuleID: req.ModuleID,
@@ -64,10 +78,14 @@ func (s *adminService) CreateLevel(req dto.AdminLevelRequest) error {
 		Order:    req.Order,
 		XPReward: req.XPReward,
 	}
-	return s.learningRepo.CreateLevel(level)
+	err := s.learningRepo.CreateLevel(level)
+	if err == nil {
+		s.LogActivity(adminID, "CREATE_LEVEL", level.ID, fmt.Sprintf("Title: %s", req.Title), ip)
+	}
+	return err
 }
 
-func (s *adminService) UpdateLevel(id string, req dto.AdminLevelRequest) error {
+func (s *adminService) UpdateLevel(adminID, id, ip string, req dto.AdminLevelRequest) error {
 	level := &models.Level{
 		ID:       id,
 		ModuleID: req.ModuleID,
@@ -76,14 +94,22 @@ func (s *adminService) UpdateLevel(id string, req dto.AdminLevelRequest) error {
 		Order:    req.Order,
 		XPReward: req.XPReward,
 	}
-	return s.learningRepo.UpdateLevel(level)
+	err := s.learningRepo.UpdateLevel(level)
+	if err == nil {
+		s.LogActivity(adminID, "UPDATE_LEVEL", id, fmt.Sprintf("Title: %s", req.Title), ip)
+	}
+	return err
 }
 
-func (s *adminService) DeleteLevel(id string) error {
-	return s.learningRepo.DeleteLevel(id)
+func (s *adminService) DeleteLevel(adminID, id, ip string) error {
+	err := s.learningRepo.DeleteLevel(id)
+	if err == nil {
+		s.LogActivity(adminID, "DELETE_LEVEL", id, "Deleted level", ip)
+	}
+	return err
 }
 
-func (s *adminService) CreateQuestion(req dto.AdminQuestionRequest) error {
+func (s *adminService) CreateQuestion(adminID, ip string, req dto.AdminQuestionRequest) error {
 	q := &models.Question{
 		ID:       uuid.NewString(),
 		LevelID:  req.LevelID,
@@ -94,10 +120,14 @@ func (s *adminService) CreateQuestion(req dto.AdminQuestionRequest) error {
 		OptionD:  req.OptionD,
 		Correct:  req.Correct,
 	}
-	return s.learningRepo.CreateQuestion(q)
+	err := s.learningRepo.CreateQuestion(q)
+	if err == nil {
+		s.LogActivity(adminID, "CREATE_QUESTION", q.ID, fmt.Sprintf("LevelID: %s", req.LevelID), ip)
+	}
+	return err
 }
 
-func (s *adminService) UpdateQuestion(id string, req dto.AdminQuestionRequest) error {
+func (s *adminService) UpdateQuestion(adminID, id, ip string, req dto.AdminQuestionRequest) error {
 	q := &models.Question{
 		ID:       id,
 		LevelID:  req.LevelID,
@@ -108,14 +138,22 @@ func (s *adminService) UpdateQuestion(id string, req dto.AdminQuestionRequest) e
 		OptionD:  req.OptionD,
 		Correct:  req.Correct,
 	}
-	return s.learningRepo.UpdateQuestion(q)
+	err := s.learningRepo.UpdateQuestion(q)
+	if err == nil {
+		s.LogActivity(adminID, "UPDATE_QUESTION", id, "Updated question content", ip)
+	}
+	return err
 }
 
-func (s *adminService) DeleteQuestion(id string) error {
-	return s.learningRepo.DeleteQuestion(id)
+func (s *adminService) DeleteQuestion(adminID, id, ip string) error {
+	err := s.learningRepo.DeleteQuestion(id)
+	if err == nil {
+		s.LogActivity(adminID, "DELETE_QUESTION", id, "Deleted question", ip)
+	}
+	return err
 }
 
-func (s *adminService) CreateCatalog(adminID string, req dto.AdminCatalogRequest) error {
+func (s *adminService) CreateCatalog(adminID, ip string, req dto.AdminCatalogRequest) error {
 	catalog := &models.BatikCatalog{
 		ID:        uuid.NewString(),
 		Name:      req.Name,
@@ -124,10 +162,14 @@ func (s *adminService) CreateCatalog(adminID string, req dto.AdminCatalogRequest
 		ImageURL:  req.ImageURL,
 		CreatedBy: &adminID,
 	}
-	return s.batikRepo.CreateCatalog(catalog)
+	err := s.batikRepo.CreateCatalog(catalog)
+	if err == nil {
+		s.LogActivity(adminID, "CREATE_CATALOG", catalog.ID, fmt.Sprintf("Name: %s", req.Name), ip)
+	}
+	return err
 }
 
-func (s *adminService) UpdateCatalog(id string, req dto.AdminCatalogRequest) error {
+func (s *adminService) UpdateCatalog(adminID, id, ip string, req dto.AdminCatalogRequest) error {
 	catalog := &models.BatikCatalog{
 		ID:       id,
 		Name:     req.Name,
@@ -135,18 +177,26 @@ func (s *adminService) UpdateCatalog(id string, req dto.AdminCatalogRequest) err
 		Origin:   req.Origin,
 		ImageURL: req.ImageURL,
 	}
-	return s.batikRepo.UpdateCatalog(catalog)
+	err := s.batikRepo.UpdateCatalog(catalog)
+	if err == nil {
+		s.LogActivity(adminID, "UPDATE_CATALOG", id, fmt.Sprintf("Name: %s", req.Name), ip)
+	}
+	return err
 }
 
-func (s *adminService) DeleteCatalog(id string) error {
-	return s.batikRepo.DeleteCatalog(id)
+func (s *adminService) DeleteCatalog(adminID, id, ip string) error {
+	err := s.batikRepo.DeleteCatalog(id)
+	if err == nil {
+		s.LogActivity(adminID, "DELETE_CATALOG", id, "Deleted catalog item", ip)
+	}
+	return err
 }
 
 func (s *adminService) GetAllCatalog() ([]models.BatikCatalog, error) {
 	return s.batikRepo.GetAllCatalog(), nil
 }
 
-func (s *adminService) CreateBadge(req dto.AdminBadgeRequest) error {
+func (s *adminService) CreateBadge(adminID, ip string, req dto.AdminBadgeRequest) error {
 	badge := &models.Badge{
 		ID:          uuid.NewString(),
 		Name:        req.Name,
@@ -154,10 +204,14 @@ func (s *adminService) CreateBadge(req dto.AdminBadgeRequest) error {
 		MinXP:       req.MinXP,
 		ImageURL:    req.ImageURL,
 	}
-	return s.badgeRepo.CreateBadge(badge)
+	err := s.badgeRepo.CreateBadge(badge)
+	if err == nil {
+		s.LogActivity(adminID, "CREATE_BADGE", badge.ID, fmt.Sprintf("Name: %s", req.Name), ip)
+	}
+	return err
 }
 
-func (s *adminService) UpdateBadge(id string, req dto.AdminBadgeRequest) error {
+func (s *adminService) UpdateBadge(adminID, id, ip string, req dto.AdminBadgeRequest) error {
 	badge := &models.Badge{
 		ID:          id,
 		Name:        req.Name,
@@ -165,11 +219,19 @@ func (s *adminService) UpdateBadge(id string, req dto.AdminBadgeRequest) error {
 		MinXP:       req.MinXP,
 		ImageURL:    req.ImageURL,
 	}
-	return s.badgeRepo.UpdateBadge(badge)
+	err := s.badgeRepo.UpdateBadge(badge)
+	if err == nil {
+		s.LogActivity(adminID, "UPDATE_BADGE", id, fmt.Sprintf("Name: %s", req.Name), ip)
+	}
+	return err
 }
 
-func (s *adminService) DeleteBadge(id string) error {
-	return s.badgeRepo.DeleteBadge(id)
+func (s *adminService) DeleteBadge(adminID, id, ip string) error {
+	err := s.badgeRepo.DeleteBadge(id)
+	if err == nil {
+		s.LogActivity(adminID, "DELETE_BADGE", id, "Deleted badge", ip)
+	}
+	return err
 }
 
 func (s *adminService) GetAllUsers(page, limit int) ([]dto.AdminUserResponse, int64, error) {

@@ -43,6 +43,7 @@ func main() {
 	batikRepo := repository.NewBatikRepository(db)
 	badgeRepo := repository.NewBadgeRepository(db)
 	learningRepo := repository.NewLearningRepository(db)
+	systemRepo := repository.NewSystemRepository(db)
 
 	// redis
 	cacheRepo := repository.NewBatikCacheRepository(rdb)
@@ -53,7 +54,8 @@ func main() {
 	gamificationService := service.NewGamificationService(badgeRepo, gamificationRepo, userRepo, rdb)
 	authService := service.NewAuthService(userRepo)
 	learningService := service.NewLearningService(learningRepo, queueRepo)
-	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, queueRepo)
+	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo)
+	superAdminService := service.NewSuperAdminService(userRepo, systemRepo, queueRepo, learningRepo, badgeRepo)
 	batikService := service.NewBatikService(
 		batikRepo,
 		cacheRepo,
@@ -74,12 +76,13 @@ func main() {
 	gamificationHandler := handler.NewGamificationHandler(gamificationService, gamificationRepo, userRepo)
 	learningHandler := handler.NewLearningHandler(learningService)
 	adminHandler := handler.NewAdminHandler(adminService)
+	superAdminHandler := handler.NewSuperAdminHandler(superAdminService)
 	// router
 	utils.StartKeepAlive()
 	router := gin.Default()
 	router.Use(middleware.StatsMiddleware(rdb))
 
-	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler)
+	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler)
 
 	router.Run()
 }

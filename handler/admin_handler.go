@@ -19,12 +19,15 @@ func NewAdminHandler(s service.AdminService) *AdminHandler {
 
 // CMS - Levels
 func (h *AdminHandler) CreateLevel(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+
 	var req dto.AdminLevelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.CreateLevel(req); err != nil {
+	if err := h.service.CreateLevel(adminID, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -32,13 +35,16 @@ func (h *AdminHandler) CreateLevel(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateLevel(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
+
 	var req dto.AdminLevelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateLevel(id, req); err != nil {
+	if err := h.service.UpdateLevel(adminID, id, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -46,8 +52,11 @@ func (h *AdminHandler) UpdateLevel(c *gin.Context) {
 }
 
 func (h *AdminHandler) DeleteLevel(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
-	if err := h.service.DeleteLevel(id); err != nil {
+
+	if err := h.service.DeleteLevel(adminID, id, ip); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -56,12 +65,15 @@ func (h *AdminHandler) DeleteLevel(c *gin.Context) {
 
 // CMS - Questions
 func (h *AdminHandler) CreateQuestion(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+
 	var req dto.AdminQuestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.CreateQuestion(req); err != nil {
+	if err := h.service.CreateQuestion(adminID, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -69,13 +81,16 @@ func (h *AdminHandler) CreateQuestion(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateQuestion(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
+
 	var req dto.AdminQuestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateQuestion(id, req); err != nil {
+	if err := h.service.UpdateQuestion(adminID, id, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -83,8 +98,11 @@ func (h *AdminHandler) UpdateQuestion(c *gin.Context) {
 }
 
 func (h *AdminHandler) DeleteQuestion(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
-	if err := h.service.DeleteQuestion(id); err != nil {
+
+	if err := h.service.DeleteQuestion(adminID, id, ip); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -94,13 +112,14 @@ func (h *AdminHandler) DeleteQuestion(c *gin.Context) {
 // CMS - Batik Catalog
 func (h *AdminHandler) CreateCatalog(c *gin.Context) {
 	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 
 	var req dto.AdminCatalogRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.CreateCatalog(adminID, req); err != nil {
+	if err := h.service.CreateCatalog(adminID, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -108,13 +127,16 @@ func (h *AdminHandler) CreateCatalog(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateCatalog(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
+
 	var req dto.AdminCatalogRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateCatalog(id, req); err != nil {
+	if err := h.service.UpdateCatalog(adminID, id, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -122,8 +144,11 @@ func (h *AdminHandler) UpdateCatalog(c *gin.Context) {
 }
 
 func (h *AdminHandler) DeleteCatalog(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
-	if err := h.service.DeleteCatalog(id); err != nil {
+
+	if err := h.service.DeleteCatalog(adminID, id, ip); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -141,12 +166,15 @@ func (h *AdminHandler) GetAllCatalog(c *gin.Context) {
 
 // CMS - Badges
 func (h *AdminHandler) CreateBadge(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+
 	var req dto.AdminBadgeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.CreateBadge(req); err != nil {
+	if err := h.service.CreateBadge(adminID, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -154,13 +182,16 @@ func (h *AdminHandler) CreateBadge(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateBadge(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
+
 	var req dto.AdminBadgeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	if err := h.service.UpdateBadge(id, req); err != nil {
+	if err := h.service.UpdateBadge(adminID, id, ip, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
@@ -168,8 +199,11 @@ func (h *AdminHandler) UpdateBadge(c *gin.Context) {
 }
 
 func (h *AdminHandler) DeleteBadge(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
 	id := c.Param("id")
-	if err := h.service.DeleteBadge(id); err != nil {
+
+	if err := h.service.DeleteBadge(adminID, id, ip); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}

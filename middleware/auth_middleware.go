@@ -67,6 +67,17 @@ func AdminMiddleware() gin.HandlerFunc {
 	}
 }
 
+func SuperAdminMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		role, exists := ctx.Get(RoleKey)
+		if !exists || role.(string) != "super_admin" {
+			abortWithError(ctx, http.StatusForbidden, "access denied: super admin role required")
+			return
+		}
+		ctx.Next()
+	}
+}
+
 func abortWithError(ctx *gin.Context, status int, msg string) {
 	ctx.JSON(status, gin.H{
 		"success": false,

@@ -14,6 +14,9 @@ type UserRepository interface {
 	UpdateTotalXP(userID string, totalXP int) error
 	GetUsersByIDs(ids []string) ([]models.User, error)
 	GetAllUsers(limit, offset int) ([]models.User, int64, error)
+	UpdateUserStatus(userID string, isBanned, isActive bool) error
+	UpdateUserRole(userID string, role string) error
+	DeleteUser(userID string) error
 }
 
 type userRepository struct {
@@ -66,4 +69,19 @@ func (r *userRepository) GetAllUsers(limit, offset int) ([]models.User, int64, e
 
 	err := db.Limit(limit).Offset(offset).Order("created_at DESC").Find(&users).Error
 	return users, total, err
+}
+
+func (r *userRepository) UpdateUserStatus(userID string, isBanned, isActive bool) error {
+	return r.db.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
+		"is_banned": isBanned,
+		"is_active": isActive,
+	}).Error
+}
+
+func (r *userRepository) UpdateUserRole(userID string, role string) error {
+	return r.db.Model(&models.User{}).Where("id = ?", userID).Update("role", role).Error
+}
+
+func (r *userRepository) DeleteUser(userID string) error {
+	return r.db.Delete(&models.User{}, "id = ?", userID).Error
 }
