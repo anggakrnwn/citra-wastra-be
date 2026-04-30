@@ -2,16 +2,41 @@ package database
 
 import (
 	"citra-wastra-be/models"
+	"os"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 func SeedAll(db *gorm.DB) {
+	SeedAdmin(db)
 	SeedBadges(db)
 	SeedLearningPath(db)
 	SeedQuestions(db)
 }
 
+func SeedAdmin(db *gorm.DB) {
+	adminPass := os.Getenv("ADMIN_PASSWORD")
+
+	if adminPass == "" {
+		panic("ADMIN_PASSWORD environment variable is not set!")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPass), 10)
+	if err != nil {
+		panic("failed to hash admin password: " + err.Error())
+	}
+
+	admin := models.User{
+		ID:       "00000000-0000-0000-0000-000000000000",
+		Username: "admin",
+		Email:    "admin@citrawastra.com",
+		Password: string(hashedPassword),
+		Role:     "admin",
+	}
+
+	db.FirstOrCreate(&admin, models.User{Username: "admin"})
+}
 func SeedBadges(db *gorm.DB) {
 	badges := []models.Badge{
 		{

@@ -3,6 +3,7 @@ package main
 import (
 	"citra-wastra-be/config"
 	"citra-wastra-be/handler"
+	"citra-wastra-be/middleware"
 	"citra-wastra-be/repository"
 	"citra-wastra-be/routes"
 	"citra-wastra-be/service"
@@ -52,6 +53,7 @@ func main() {
 	gamificationService := service.NewGamificationService(badgeRepo, gamificationRepo, userRepo, rdb)
 	authService := service.NewAuthService(userRepo)
 	learningService := service.NewLearningService(learningRepo, queueRepo)
+	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, queueRepo)
 	batikService := service.NewBatikService(
 		batikRepo,
 		cacheRepo,
@@ -71,11 +73,13 @@ func main() {
 	batikHandler := handler.NewBatikHandler(batikService)
 	gamificationHandler := handler.NewGamificationHandler(gamificationService, gamificationRepo, userRepo)
 	learningHandler := handler.NewLearningHandler(learningService)
+	adminHandler := handler.NewAdminHandler(adminService)
 	// router
 	utils.StartKeepAlive()
 	router := gin.Default()
+	router.Use(middleware.StatsMiddleware(rdb))
 
-	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler)
+	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler)
 
 	router.Run()
 }

@@ -13,6 +13,8 @@ type QueueRepository interface {
 	EnqueueRaw(ctx context.Context, data []byte) error
 	DequeueXPJob(ctx context.Context) (string, error)
 	AckJob(ctx context.Context, data string) error
+	GetQueueLength(ctx context.Context) (int64, error)
+	GetAPIStats(ctx context.Context) (map[string]string, error)
 }
 
 type queueRepository struct {
@@ -41,4 +43,22 @@ func (r *queueRepository) DequeueXPJob(ctx context.Context) (string, error) {
 
 func (r *queueRepository) AckJob(ctx context.Context, data string) error {
 	return r.redis.LRem(ctx, "xp_processing", 1, data).Err()
+}
+
+func (r *queueRepository) GetQueueLength(ctx context.Context) (int64, error) {
+	return r.redis.LLen(ctx, "xp_queue").Result()
+}
+
+func (r *queueRepository) GetAPIStats(ctx context.Context) (map[string]string, error) {
+	keys, err := r.redis.Keys(ctx, "stats:hits:*").Result()
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make(map[string]string)
+	for _, key := range keys {
+		val, _ := r.redis.Get(ctx, key).Result()
+		stats[key] = val
+	}
+	return stats, nil
 }
