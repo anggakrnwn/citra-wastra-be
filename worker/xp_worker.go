@@ -57,7 +57,7 @@ func (w *XPWorker) Start(ctx context.Context) {
 			continue
 		}
 
-		log.Printf("processing XP: User %s (+%d) retry=%d",
+		log.Printf("processing XP: User %s (%d) retry=%d",
 			payload.UserID, payload.XPGain, payload.Retry)
 
 		err = w.service.ProcessXPAndBadges(payload)

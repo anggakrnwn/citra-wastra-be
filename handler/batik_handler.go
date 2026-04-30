@@ -23,7 +23,8 @@ func (h *BatikHandler) Detect(c *gin.Context) {
 	val, exists := c.Get(middleware.UserIDKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "unauthorized",
+			"success": false,
+			"error":   "unauthorized",
 		})
 		return
 	}
@@ -31,7 +32,8 @@ func (h *BatikHandler) Detect(c *gin.Context) {
 	userID, ok := val.(string)
 	if !ok || userID == "" {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "internal identity error",
+			"success": false,
+			"error":   "internal identity error",
 		})
 		return
 	}
@@ -39,7 +41,8 @@ func (h *BatikHandler) Detect(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "image file is required",
+			"success": false,
+			"error":   "image file is required",
 		})
 		return
 	}
@@ -52,13 +55,20 @@ func (h *BatikHandler) Detect(c *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrImageUpload):
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		case errors.Is(err, service.ErrClassification):
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		default:
 			log.Printf("detect batik error (user_id=%s): %v", userID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to process batik detection",
+				"success": false,
+				"error":   "failed to process batik detection",
 			})
 		}
 		return

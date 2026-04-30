@@ -13,6 +13,7 @@ func SetupRoutes(
 	healthHandler *handler.HealthHandler,
 	batikHandler *handler.BatikHandler,
 	gamificationHandler *handler.GamificationHandler,
+	learningHandler *handler.LearningHandler,
 ) {
 
 	r.GET("/health", healthHandler.Check)
@@ -25,13 +26,25 @@ func SetupRoutes(
 			auth.POST("/login", authHandler.Login)
 		}
 
-		protected := api.Group("/")
+		learning := api.Group("/learning")
+		{
+			learning.GET("/islands", learningHandler.GetIslands)
+			learning.GET("/islands/:id/modules", learningHandler.GetModules)
+		}
+
+		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware())
 		{
+
+			protected.GET("/leaderboard", gamificationHandler.GetLeaderboard)
+
 			protected.GET("/user/me", authHandler.GetProfile)
 			protected.POST("/batik/detect", batikHandler.Detect)
 			protected.GET("/profile/badges", gamificationHandler.GetMyBadges)
 			protected.POST("/profile/badges/equip", gamificationHandler.EquipBadge)
+			protected.POST("/learning/levels/:id/complete", learningHandler.CompleteLevel)
+			protected.POST("/learning/levels/:id/quiz", learningHandler.SubmitQuiz)
+
 		}
 	}
 }
