@@ -34,7 +34,7 @@ type UserLevelProgress struct {
 }
 
 type Question struct {
-	ID       string `gorm:"primaryKey;type:uuid"`
+	ID       string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	LevelID  string `gorm:"type:uuid;index"`
 	Question string `gorm:"type:text"`
 	OptionA  string `gorm:"type:text"`
