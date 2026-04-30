@@ -13,6 +13,11 @@ type BadgeRepository interface {
 	UnlockBadge(userID string, badgeID string) error
 	GetEquippedBadge(userID string) (models.UserBadge, error)
 	EquipBadge(userID string, badgeID string) error
+
+	// Admin
+	CreateBadge(badge *models.Badge) error
+	UpdateBadge(badge *models.Badge) error
+	DeleteBadge(id string) error
 }
 
 type badgeRepository struct {
@@ -60,4 +65,16 @@ func (r *badgeRepository) EquipBadge(userID string, badgeID string) error {
 
 		return tx.Model(&models.UserBadge{}).Where("user_id = ? AND badge_id = ?", userID, badgeID).Update("is_equipped", true).Error
 	})
+}
+
+func (r *badgeRepository) CreateBadge(badge *models.Badge) error {
+	return r.db.Create(badge).Error
+}
+
+func (r *badgeRepository) UpdateBadge(badge *models.Badge) error {
+	return r.db.Save(badge).Error
+}
+
+func (r *badgeRepository) DeleteBadge(id string) error {
+	return r.db.Delete(&models.Badge{}, "id = ?", id).Error
 }

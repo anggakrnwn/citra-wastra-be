@@ -13,6 +13,7 @@ type UserRepository interface {
 	FindByID(ID string) (*models.User, error)
 	UpdateTotalXP(userID string, totalXP int) error
 	GetUsersByIDs(ids []string) ([]models.User, error)
+	GetAllUsers(limit, offset int) ([]models.User, int64, error)
 }
 
 type userRepository struct {
@@ -54,4 +55,15 @@ func (r *userRepository) GetUsersByIDs(ids []string) ([]models.User, error) {
 
 	err := r.db.Where("id IN ?", ids).Select("id", "username").Find(&users).Error
 	return users, err
+}
+
+func (r *userRepository) GetAllUsers(limit, offset int) ([]models.User, int64, error) {
+	var users []models.User
+	var total int64
+
+	db := r.db.Model(&models.User{})
+	db.Count(&total)
+
+	err := db.Limit(limit).Offset(offset).Order("created_at DESC").Find(&users).Error
+	return users, total, err
 }

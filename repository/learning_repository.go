@@ -11,9 +11,15 @@ type LearningRepository interface {
 	GetModulesByIsland(islandID string) ([]models.Module, error)
 	GetLevelsByModule(moduleID string) ([]models.Level, error)
 	GetLevelByID(levelID string) (models.Level, error)
+	CreateLevel(level *models.Level) error
+	UpdateLevel(level *models.Level) error
+	DeleteLevel(levelID string) error
 	SaveProgress(progress *models.UserLevelProgress) error
 	GetProgress(userID string, levelID string) (*models.UserLevelProgress, error)
 	GetQuestionsByLevel(levelID string) ([]models.Question, error)
+	CreateQuestion(q *models.Question) error
+	UpdateQuestion(q *models.Question) error
+	DeleteQuestion(id string) error
 }
 
 type learningRepository struct {
@@ -48,6 +54,18 @@ func (r *learningRepository) GetLevelByID(levelID string) (models.Level, error) 
 	return level, err
 }
 
+func (r *learningRepository) CreateLevel(level *models.Level) error {
+	return r.db.Create(level).Error
+}
+
+func (r *learningRepository) UpdateLevel(level *models.Level) error {
+	return r.db.Save(level).Error
+}
+
+func (r *learningRepository) DeleteLevel(levelID string) error {
+	return r.db.Delete(&models.Level{}, "id = ?", levelID).Error
+}
+
 func (r *learningRepository) SaveProgress(progress *models.UserLevelProgress) error {
 	return r.db.FirstOrCreate(progress, models.UserLevelProgress{
 		UserID:  progress.UserID,
@@ -68,4 +86,16 @@ func (r *learningRepository) GetQuestionsByLevel(levelID string) ([]models.Quest
 	var questions []models.Question
 	err := r.db.Where("level_id = ?", levelID).Find(&questions).Error
 	return questions, err
+}
+
+func (r *learningRepository) CreateQuestion(q *models.Question) error {
+	return r.db.Create(q).Error
+}
+
+func (r *learningRepository) UpdateQuestion(q *models.Question) error {
+	return r.db.Save(q).Error
+}
+
+func (r *learningRepository) DeleteQuestion(id string) error {
+	return r.db.Delete(&models.Question{}, "id = ?", id).Error
 }
