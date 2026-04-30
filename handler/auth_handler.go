@@ -42,6 +42,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 				"success": false,
 				"error":   "email already registered",
 			})
+		case errors.Is(err, service.ErrUsernameTaken):
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"error":   "username already taken",
+			})
 		default:
 			log.Printf("auth register error (email=%s): %v", req.Email, err)
 			c.JSON(http.StatusInternalServerError, gin.H{

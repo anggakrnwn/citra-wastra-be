@@ -101,7 +101,7 @@ func (s *batikService) DetectBatik(ctx context.Context, userID string, req dto.U
 		log.Printf("narrator error: %v", err)
 
 		finalPhilosophy = philosophy
-		fmt.Println("using static philosophy due to narrator error")
+		log.Println("using static philosophy due to narrator error")
 	}
 
 	optimizedURL := utils.OptimizeImageURL(imageURL)

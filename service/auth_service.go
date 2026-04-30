@@ -40,6 +40,14 @@ func (s *authService) Register(req dto.RegisterRequest) (dto.UserResponse, error
 		return dto.UserResponse{}, ErrEmailTaken
 	}
 
+	existingUser, err = s.repo.FindByUsername(user.Username)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return dto.UserResponse{}, err
+	}
+	if existingUser != nil && existingUser.ID != "" {
+		return dto.UserResponse{}, ErrUsernameTaken
+	}
+
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return dto.UserResponse{}, err

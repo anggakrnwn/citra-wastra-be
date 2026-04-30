@@ -9,8 +9,10 @@ import (
 type UserRepository interface {
 	Create(user *models.User) error
 	FindByEmail(email string) (*models.User, error)
+	FindByUsername(username string) (*models.User, error)
 	FindByID(ID string) (*models.User, error)
 	UpdateTotalXP(userID string, totalXP int) error
+	GetUsersByIDs(ids []string) ([]models.User, error)
 }
 
 type userRepository struct {
@@ -31,6 +33,12 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 	return &user, err
 }
 
+func (r *userRepository) FindByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("username = ?", username).First(&user).Error
+	return &user, err
+}
+
 func (r *userRepository) FindByID(id string) (*models.User, error) {
 	var user models.User
 	err := r.db.First(&user, "id = ?", id).Error
@@ -39,4 +47,11 @@ func (r *userRepository) FindByID(id string) (*models.User, error) {
 
 func (r *userRepository) UpdateTotalXP(userID string, totalXP int) error {
 	return r.db.Model(&models.User{}).Where("id = ?", userID).Update("xp", totalXP).Error
+}
+
+func (r *userRepository) GetUsersByIDs(ids []string) ([]models.User, error) {
+	var users []models.User
+
+	err := r.db.Where("id IN ?", ids).Select("id", "username").Find(&users).Error
+	return users, err
 }

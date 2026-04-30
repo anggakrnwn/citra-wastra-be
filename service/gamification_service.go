@@ -135,6 +135,15 @@ func (s *gamificationService) ProcessXPAndBadges(payload dto.XPJobPayload) error
 		return err
 	}
 
+	if newXP < 0 {
+		log.Printf("xp minus detected for user %s (%f). resetting to 0.", payload.UserID, newXP)
+
+		if err := s.gamiRepo.SetUserXP(ctx, payload.UserID, 0); err != nil {
+			return err
+		}
+		newXP = 0
+	}
+
 	if err := s.userRepo.UpdateTotalXP(payload.UserID, int(newXP)); err != nil {
 		log.Printf("failed sync XP to DB for user %s: %v", payload.UserID, err)
 	}
