@@ -44,7 +44,9 @@ func (r *systemRepository) GetConfig(key string) (*models.SystemConfig, error) {
 }
 
 func (r *systemRepository) SetConfig(config *models.SystemConfig) error {
-	return r.db.Save(config).Error
+	return r.db.Where("key = ?", config.Key).
+		Assign(models.SystemConfig{Value: config.Value, Category: config.Category}).
+		FirstOrCreate(config).Error
 }
 
 func (r *systemRepository) GetAllConfigs() ([]models.SystemConfig, error) {

@@ -56,6 +56,7 @@ func main() {
 	learningService := service.NewLearningService(learningRepo, queueRepo)
 	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo)
 	superAdminService := service.NewSuperAdminService(userRepo, systemRepo, queueRepo, learningRepo, badgeRepo)
+	chatbotService := service.NewChatbotService(client, modelID)
 	batikService := service.NewBatikService(
 		batikRepo,
 		cacheRepo,
@@ -77,12 +78,13 @@ func main() {
 	learningHandler := handler.NewLearningHandler(learningService)
 	adminHandler := handler.NewAdminHandler(adminService)
 	superAdminHandler := handler.NewSuperAdminHandler(superAdminService)
+	chatbotHandler := handler.NewChatbotHandler(chatbotService)
 	// router
 	utils.StartKeepAlive()
 	router := gin.Default()
 	router.Use(middleware.StatsMiddleware(rdb))
 
-	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler, systemRepo)
+	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler, chatbotHandler, systemRepo)
 
 	router.Run()
 }

@@ -11,6 +11,12 @@ import (
 
 func MaintenanceMiddleware(repo repository.SystemRepository) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		path := ctx.Request.URL.Path
+		if strings.Contains(path, "/auth/") {
+			ctx.Next()
+			return
+		}
+
 		config, err := repo.GetConfig("MAINTENANCE_MODE")
 		if err == nil && config.Value == "true" {
 			authHeader := ctx.GetHeader("Authorization")

@@ -17,6 +17,7 @@ func SetupRoutes(
 	learningHandler *handler.LearningHandler,
 	adminHandler *handler.AdminHandler,
 	superAdminHandler *handler.SuperAdminHandler,
+	chatbotHandler *handler.ChatbotHandler,
 	systemRepo repository.SystemRepository,
 ) {
 
@@ -51,6 +52,8 @@ func SetupRoutes(
 			protected.POST("/learning/levels/:id/complete", learningHandler.CompleteLevel)
 			protected.POST("/learning/levels/:id/quiz", learningHandler.SubmitQuiz)
 
+			// Chatbot
+			protected.POST("/chat", chatbotHandler.Chat)
 		}
 
 		admin := api.Group("/admin")

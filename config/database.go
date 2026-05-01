@@ -58,7 +58,12 @@ func InitDB() *gorm.DB {
 
 	fmt.Println("DB migrasi sukses!")
 
-	database.SeedAll(db)
+	if os.Getenv("APP_ENV") != "production" {
+		database.SeedAll(db)
+	} else {
+		database.SeedAdmin(db)
+		database.SeedConfigs(db)
+	}
 
 	return db
 }
