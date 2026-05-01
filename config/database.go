@@ -13,22 +13,28 @@ import (
 )
 
 func InitDB() *gorm.DB {
-
 	if err := godotenv.Load(); err != nil {
-		fmt.Println(".env file not found!")
+		if os.Getenv("APP_ENV") != "production" {
+			fmt.Println("info: .env file not found, using system environment variables")
+		}
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PORT"),
-	)
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_USER"),
+			os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_NAME"),
+			os.Getenv("DB_PORT"),
+		)
+	}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		PrepareStmt: false,
+	})
 	if err != nil {
-		log.Fatal("gagal koneksi database", err)
+		log.Fatal("gagal koneksi database: ", err)
 	}
 
 	db.Exec(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`)
