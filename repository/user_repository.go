@@ -17,6 +17,8 @@ type UserRepository interface {
 	UpdateUserStatus(userID string, isBanned, isActive bool) error
 	UpdateUserRole(userID string, role string) error
 	DeleteUser(userID string) error
+	FindByOAuthID(provider, oauthID string) (*models.User, error)
+	Update(user *models.User) error
 }
 
 type userRepository struct {
@@ -83,5 +85,15 @@ func (r *userRepository) UpdateUserRole(userID string, role string) error {
 }
 
 func (r *userRepository) DeleteUser(userID string) error {
-	return r.db.Delete(&models.User{}, "id = ?", userID).Error
+	return r.db.Unscoped().Delete(&models.User{}, "id = ?", userID).Error
+}
+
+func (r *userRepository) FindByOAuthID(provider, oauthID string) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("oauth_provider = ? AND oauth_id = ?", provider, oauthID).First(&user).Error
+	return &user, err
+}
+
+func (r *userRepository) Update(user *models.User) error {
+	return r.db.Save(user).Error
 }

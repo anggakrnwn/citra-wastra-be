@@ -15,7 +15,27 @@ func SeedAll(db *gorm.DB) {
 	SeedBadges(db)
 	SeedLearningPath(db)
 	SeedQuestions(db)
+	SeedConfigs(db)
 	log.Println("seeder completed.")
+}
+
+func SeedConfigs(db *gorm.DB) {
+	configs := []models.SystemConfig{
+		{
+			Key:      "MAINTENANCE_MODE",
+			Value:    "false",
+			Category: "system",
+		},
+		{
+			Key:      "MIN_XP_PENCARI_POLA",
+			Value:    "500",
+			Category: "gamification",
+		},
+	}
+
+	for _, cfg := range configs {
+		db.Where(models.SystemConfig{Key: cfg.Key}).FirstOrCreate(&cfg)
+	}
 }
 
 func SeedAdmin(db *gorm.DB) {

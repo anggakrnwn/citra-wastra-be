@@ -149,11 +149,9 @@ func (s *superAdminService) LogActivity(adminID, action, target, details, ip str
 }
 
 func (s *superAdminService) ClearXPQueue(ctx context.Context) error {
-	// Simplified: would need a method in queueRepo to clear queue
-	return nil
+	return s.queueRepo.ClearQueue(ctx)
 }
 
 func (s *superAdminService) ResetTestData() error {
-	// Dangerous: would truncate tables or delete specific records
-	return nil
+	return s.systemRepo.ResetTestData()
 }

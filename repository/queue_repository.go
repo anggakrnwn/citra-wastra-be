@@ -15,6 +15,7 @@ type QueueRepository interface {
 	AckJob(ctx context.Context, data string) error
 	GetQueueLength(ctx context.Context) (int64, error)
 	GetAPIStats(ctx context.Context) (map[string]string, error)
+	ClearQueue(ctx context.Context) error
 }
 
 type queueRepository struct {
@@ -61,4 +62,8 @@ func (r *queueRepository) GetAPIStats(ctx context.Context) (map[string]string, e
 		stats[key] = val
 	}
 	return stats, nil
+}
+
+func (r *queueRepository) ClearQueue(ctx context.Context) error {
+	return r.redis.Del(ctx, "xp_queue", "xp_processing").Err()
 }

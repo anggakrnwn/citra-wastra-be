@@ -14,6 +14,7 @@ type SystemRepository interface {
 	SetConfig(config *models.SystemConfig) error
 	GetAllConfigs() ([]models.SystemConfig, error)
 	DeleteConfig(key string) error
+	ResetTestData() error
 }
 
 type systemRepository struct {
@@ -54,4 +55,27 @@ func (r *systemRepository) GetAllConfigs() ([]models.SystemConfig, error) {
 
 func (r *systemRepository) DeleteConfig(key string) error {
 	return r.db.Delete(&models.SystemConfig{}, "key = ?", key).Error
+}
+
+func (r *systemRepository) ResetTestData() error {
+	tx := r.db.Begin()
+
+	if err := tx.Exec("TRUNCATE TABLE audit_logs CASCADE").Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Exec("TRUNCATE TABLE batiks CASCADE").Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Exec("TRUNCATE TABLE user_level_progresses CASCADE").Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Exec("TRUNCATE TABLE user_badges CASCADE").Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
