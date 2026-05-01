@@ -68,6 +68,23 @@ func (h *SuperAdminHandler) UpdateUserRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "user role updated successfully"})
 }
 
+func (h *SuperAdminHandler) ResetPassword(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+	id := c.Param("id")
+
+	var req dto.SuperAdminResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	if err := h.service.ResetUserPassword(adminID, id, ip, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "user password reset successfully"})
+}
+
 func (h *SuperAdminHandler) DeleteUser(c *gin.Context) {
 	adminID := c.GetString("user_id")
 	ip := c.ClientIP()

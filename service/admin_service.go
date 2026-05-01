@@ -244,12 +244,15 @@ func (s *adminService) GetAllUsers(page, limit int) ([]dto.AdminUserResponse, in
 	var res []dto.AdminUserResponse
 	for _, u := range users {
 		res = append(res, dto.AdminUserResponse{
-			ID:        u.ID,
-			Username:  u.Username,
-			Email:     u.Email,
-			XP:        u.XP,
-			Role:      u.Role,
-			CreatedAt: u.CreatedAt,
+			ID:         u.ID,
+			Username:   u.Username,
+			Email:      u.Email,
+			XP:         u.XP,
+			Role:       u.Role,
+			IsVerified: u.IsVerified,
+			IsBanned:   u.IsBanned,
+			IsActive:   u.IsActive,
+			CreatedAt:  u.CreatedAt,
 		})
 	}
 	return res, total, nil

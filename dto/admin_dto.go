@@ -35,12 +35,15 @@ type AdminBadgeRequest struct {
 }
 
 type AdminUserResponse struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	XP        int       `json:"xp"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         string    `json:"id"`
+	Username   string    `json:"username"`
+	Email      string    `json:"email"`
+	XP         int       `json:"xp"`
+	Role       string    `json:"role"`
+	IsVerified bool      `json:"is_verified"`
+	IsBanned   bool      `json:"is_banned"`
+	IsActive   bool      `json:"is_active"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type AdminSystemHealthResponse struct {

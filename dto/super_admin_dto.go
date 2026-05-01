@@ -17,6 +17,10 @@ type SuperAdminUpdateRoleRequest struct {
 	Role string `json:"role" binding:"required"`
 }
 
+type SuperAdminResetPasswordRequest struct {
+	NewPassword string `json:"new_password" binding:"required,min=8"`
+}
+
 type SuperAdminConfigDTO struct {
 	Key      string `json:"key" binding:"required"`
 	Value    string `json:"value" binding:"required"`
