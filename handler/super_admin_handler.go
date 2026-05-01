@@ -68,6 +68,18 @@ func (h *SuperAdminHandler) UpdateUserRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "user role updated successfully"})
 }
 
+func (h *SuperAdminHandler) DeleteUser(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+	id := c.Param("id")
+
+	if err := h.service.DeleteUser(adminID, id, ip); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "user permanently deleted successfully"})
+}
+
 // System Config
 func (h *SuperAdminHandler) UpdateConfig(c *gin.Context) {
 	adminID := c.GetString("user_id")
@@ -113,4 +125,21 @@ func (h *SuperAdminHandler) GetAuditLogs(c *gin.Context) {
 			"total": total,
 		},
 	})
+}
+
+// Technical
+func (h *SuperAdminHandler) ClearXPQueue(c *gin.Context) {
+	if err := h.service.ClearXPQueue(c.Request.Context()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "XP queue cleared successfully"})
+}
+
+func (h *SuperAdminHandler) ResetTestData(c *gin.Context) {
+	if err := h.service.ResetTestData(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Test data reset successfully"})
 }

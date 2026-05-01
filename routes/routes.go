@@ -3,6 +3,7 @@ package routes
 import (
 	"citra-wastra-be/handler"
 	"citra-wastra-be/middleware"
+	"citra-wastra-be/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,16 +17,19 @@ func SetupRoutes(
 	learningHandler *handler.LearningHandler,
 	adminHandler *handler.AdminHandler,
 	superAdminHandler *handler.SuperAdminHandler,
+	systemRepo repository.SystemRepository,
 ) {
 
 	r.GET("/health", healthHandler.Check)
 
 	api := r.Group("/api/v1")
+	api.Use(middleware.MaintenanceMiddleware(systemRepo))
 	{
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.POST("/google", authHandler.GoogleLogin)
 		}
 
 		learning := api.Group("/learning")
@@ -86,6 +90,7 @@ func SetupRoutes(
 			superAdmin.POST("/admins", superAdminHandler.CreateAdmin)
 			superAdmin.PUT("/users/:id/status", superAdminHandler.UpdateUserStatus)
 			superAdmin.PUT("/users/:id/role", superAdminHandler.UpdateUserRole)
+			superAdmin.DELETE("/users/:id", superAdminHandler.DeleteUser)
 
 			// System Configuration
 			superAdmin.GET("/config", superAdminHandler.GetAllConfigs)
@@ -93,6 +98,10 @@ func SetupRoutes(
 
 			// Audit Logs
 			superAdmin.GET("/audit-logs", superAdminHandler.GetAuditLogs)
+
+			// Technical
+			superAdmin.POST("/technical/clear-queue", superAdminHandler.ClearXPQueue)
+			superAdmin.POST("/technical/reset-data", superAdminHandler.ResetTestData)
 		}
 	}
 }

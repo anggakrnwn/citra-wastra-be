@@ -65,6 +65,36 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 }
 
+func (h *AuthHandler) GoogleLogin(c *gin.Context) {
+	var req struct {
+		IDToken string `json:"id_token" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "id_token is required",
+		})
+		return
+	}
+
+	loginResponse, err := h.service.GoogleLogin(c.Request.Context(), req.IDToken)
+	if err != nil {
+		log.Printf("google login error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "google login failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "login successful",
+		"data":    loginResponse,
+	})
+}
+
 func (h *AuthHandler) Login(c *gin.Context) {
 	var input dto.LoginRequest
 

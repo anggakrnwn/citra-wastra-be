@@ -82,7 +82,7 @@ func main() {
 	router := gin.Default()
 	router.Use(middleware.StatsMiddleware(rdb))
 
-	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler)
+	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler, systemRepo)
 
 	router.Run()
 }

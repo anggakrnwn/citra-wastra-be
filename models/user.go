@@ -7,17 +7,20 @@ import (
 )
 
 type User struct {
-	ID        string         `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Username  string         `gorm:"unique;not null" json:"username"`
-	Email     string         `gorm:"unique;not null" json:"email"`
-	Password  string         `gorm:"not null" json:"-"`
-	Role      string         `gorm:"type:varchar(20);not null;default:'user'" json:"role"`
-	XP        int            `gorm:"default:0" json:"xp"`
-	IsBanned  bool           `gorm:"default:false" json:"is_banned"`
-	IsActive  bool           `gorm:"default:true" json:"is_active"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID            string         `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Username      string         `gorm:"unique;not null" json:"username"`
+	Email         string         `gorm:"unique;not null" json:"email"`
+	Password      string         `gorm:"default:null" json:"-"`
+	Role          string         `gorm:"type:varchar(20);not null;default:'user'" json:"role"`
+	XP            int            `gorm:"default:0" json:"xp"`
+	IsVerified    bool           `gorm:"default:true" json:"is_verified"`
+	OAuthID       string         `gorm:"type:varchar(100);index" json:"oauth_id"`
+	OAuthProvider string         `gorm:"type:varchar(20)" json:"oauth_provider"`
+	IsBanned      bool           `gorm:"default:false" json:"is_banned"`
+	IsActive      bool           `gorm:"default:true" json:"is_active"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 
 	Profile UserProfile `json:"profile" gorm:"foreignKey:UserID"`
 	Shop    *Shop       `json:"shop,omitempty" gorm:"foreignKey:UserID"`
