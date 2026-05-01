@@ -16,7 +16,7 @@ import (
 )
 
 type AuthService interface {
-	Register(req dto.RegisterRequest) (dto.UserResponse, error)
+	Register(req dto.RegisterRequest) (dto.LoginResponse, error)
 	Login(req dto.LoginRequest) (dto.LoginResponse, error)
 	GetProfile(userID string) (dto.UserResponse, error)
 	GoogleLogin(ctx context.Context, idToken string) (dto.LoginResponse, error)
@@ -30,7 +30,7 @@ func NewAuthService(repo repository.UserRepository) AuthService {
 	return &authService{repo}
 }
 
-func (s *authService) Register(req dto.RegisterRequest) (dto.UserResponse, error) {
+func (s *authService) Register(req dto.RegisterRequest) (dto.LoginResponse, error) {
 	user := models.User{
 		Username:   req.Username,
 		Email:      req.Email,
@@ -40,36 +40,44 @@ func (s *authService) Register(req dto.RegisterRequest) (dto.UserResponse, error
 
 	existingUser, err := s.repo.FindByEmail(user.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return dto.UserResponse{}, err
+		return dto.LoginResponse{}, err
 	}
 	if existingUser != nil && existingUser.ID != "" {
-		return dto.UserResponse{}, ErrEmailTaken
+		return dto.LoginResponse{}, ErrEmailTaken
 	}
 
 	existingUser, err = s.repo.FindByUsername(user.Username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return dto.UserResponse{}, err
+		return dto.LoginResponse{}, err
 	}
 	if existingUser != nil && existingUser.ID != "" {
-		return dto.UserResponse{}, ErrUsernameTaken
+		return dto.LoginResponse{}, ErrUsernameTaken
 	}
 
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
-		return dto.UserResponse{}, err
+		return dto.LoginResponse{}, err
 	}
 	user.Password = hashedPassword
 
 	err = s.repo.Create(&user)
 	if err != nil {
-		return dto.UserResponse{}, err
+		return dto.LoginResponse{}, err
 	}
 
-	return dto.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
+	token, err := utils.GenerateToken(user.ID, user.Role)
+	if err != nil {
+		return dto.LoginResponse{}, err
+	}
+
+	return dto.LoginResponse{
+		Token: token,
+		Data: dto.UserResponse{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
+		},
 	}, nil
 }
 

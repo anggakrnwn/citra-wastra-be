@@ -34,7 +34,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	userResponse, err := h.service.Register(req)
+	loginResponse, err := h.service.Register(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrEmailTaken):
@@ -60,7 +60,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "user created successfully",
-		"data":    userResponse,
+		"data":    loginResponse,
 	})
 
 }
