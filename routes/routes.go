@@ -90,6 +90,7 @@ func SetupRoutes(
 			superAdmin.POST("/admins", superAdminHandler.CreateAdmin)
 			superAdmin.PUT("/users/:id/status", superAdminHandler.UpdateUserStatus)
 			superAdmin.PUT("/users/:id/role", superAdminHandler.UpdateUserRole)
+			superAdmin.PUT("/users/:id/reset-password", superAdminHandler.ResetPassword)
 			superAdmin.DELETE("/users/:id", superAdminHandler.DeleteUser)
 
 			// System Configuration

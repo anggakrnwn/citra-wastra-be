@@ -17,6 +17,7 @@ type SuperAdminService interface {
 	UpdateUserStatus(adminID, userID, ip string, req dto.SuperAdminUpdateUserStatusRequest) error
 	UpdateUserRole(adminID, userID, ip string, req dto.SuperAdminUpdateRoleRequest) error
 	DeleteUser(adminID, userID, ip string) error
+	ResetUserPassword(adminID, userID, ip string, req dto.SuperAdminResetPasswordRequest) error
 
 	// System Config
 	UpdateConfig(adminID, ip string, req dto.SuperAdminConfigDTO) error
@@ -86,6 +87,21 @@ func (s *superAdminService) DeleteUser(adminID, userID, ip string) error {
 	err := s.userRepo.DeleteUser(userID)
 	if err == nil {
 		s.LogActivity(adminID, "DELETE_USER", userID, "Permanently deleted user", ip)
+	}
+	return err
+}
+
+func (s *superAdminService) ResetUserPassword(adminID, userID, ip string, req dto.SuperAdminResetPasswordRequest) error {
+	hashedPassword, _ := utils.HashPassword(req.NewPassword)
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return err
+	}
+
+	user.Password = hashedPassword
+	err = s.userRepo.Update(user)
+	if err == nil {
+		s.LogActivity(adminID, "RESET_PASSWORD", userID, "Manually reset user password", ip)
 	}
 	return err
 }
