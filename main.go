@@ -82,6 +82,7 @@ func main() {
 	// router
 	utils.StartKeepAlive()
 	router := gin.Default()
+	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.StatsMiddleware(rdb))
 
 	routes.SetupRoutes(router, authHandler, healthHandler, batikHandler, gamificationHandler, learningHandler, adminHandler, superAdminHandler, chatbotHandler, systemRepo)
