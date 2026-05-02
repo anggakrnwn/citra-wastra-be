@@ -105,10 +105,5 @@ func setupDatabase(db *gorm.DB) error {
 }
 
 func runSeeders(db *gorm.DB) {
-	if os.Getenv("APP_ENV") != "production" {
-		database.SeedAll(db)
-	} else {
-		database.SeedAdmin(db)
-		database.SeedConfigs(db)
-	}
+	database.SeedAll(db)
 }

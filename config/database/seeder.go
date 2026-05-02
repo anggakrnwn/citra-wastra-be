@@ -126,10 +126,10 @@ func SeedBadges(db *gorm.DB) {
 func SeedLearningPath(db *gorm.DB) {
 	islands := []models.Island{
 		{ID: "550e8400-e29b-41d4-a716-446655440000", Name: "Jawa", Description: "Pusat wastra dengan filosofi keraton dan pesisiran."},
-		{ID: "550e8400-e29b-41d4-a716-446655440001", Name: "Bali", Description: "Wastra yang kental dengan nilai spiritual dan tradisi Hindu-Bali."},
-		{ID: "550e8400-e29b-41d4-a716-446655440002", Name: "Sumatera", Description: "Perpaduan motif akulturasi budaya Melayu dan Islam."},
-		{ID: "550e8400-e29b-41d4-a716-446655440003", Name: "Jakarta", Description: "Batik Betawi dengan warna cerah dan motif ikon kota."},
-		{ID: "550e8400-e29b-41d4-a716-446655440004", Name: "Maluku", Description: "Wastra kepulauan yang menonjolkan kekayaan alam rempah."},
+		{ID: "550e8400-e29b-41d4-a716-446655440001", Name: "Sumatera", Description: "Perpaduan motif akulturasi budaya Melayu dan Islam."},
+		{ID: "550e8400-e29b-41d4-a716-446655440002", Name: "Sulawesi", Description: "Wastra dengan corak geometris dan simbol keberanian."},
+		{ID: "550e8400-e29b-41d4-a716-446655440003", Name: "Papua", Description: "Motif etnik yang menggambarkan kekayaan alam dan burung cendrawasih."},
+		{ID: "550e8400-e29b-41d4-a716-446655440004", Name: "Kalimantan", Description: "Wastra dengan pewarnaan alami dan motif batang garing."},
 	}
 
 	for _, is := range islands {
