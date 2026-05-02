@@ -9,6 +9,7 @@ import (
 type LearningRepository interface {
 	GetIslands() ([]models.Island, error)
 	GetModulesByIsland(islandID string) ([]models.Module, error)
+	CreateModule(module *models.Module) error
 	GetLevelsByModule(moduleID string) ([]models.Level, error)
 	GetLevelByID(levelID string) (models.Level, error)
 	CreateLevel(level *models.Level) error
@@ -40,6 +41,10 @@ func (r *learningRepository) GetModulesByIsland(islandID string) ([]models.Modul
 	var modules []models.Module
 	err := r.db.Where("island_id = ?", islandID).Preload("Levels").Find(&modules).Error
 	return modules, err
+}
+
+func (r *learningRepository) CreateModule(module *models.Module) error {
+	return r.db.Create(module).Error
 }
 
 func (r *learningRepository) GetLevelsByModule(moduleID string) ([]models.Level, error) {

@@ -16,6 +16,9 @@ type AdminService interface {
 	UpdateLevel(adminID, id, ip string, req dto.AdminLevelRequest) error
 	DeleteLevel(adminID, id, ip string) error
 
+	// CMS - Modules
+	CreateModule(adminID, ip string, req dto.AdminModuleRequest) error
+
 	// CMS - Questions
 	CreateQuestion(adminID, ip string, req dto.AdminQuestionRequest) error
 	UpdateQuestion(adminID, id, ip string, req dto.AdminQuestionRequest) error
@@ -105,6 +108,20 @@ func (s *adminService) DeleteLevel(adminID, id, ip string) error {
 	err := s.learningRepo.DeleteLevel(id)
 	if err == nil {
 		s.LogActivity(adminID, "DELETE_LEVEL", id, "Deleted level", ip)
+	}
+	return err
+}
+
+func (s *adminService) CreateModule(adminID, ip string, req dto.AdminModuleRequest) error {
+	module := &models.Module{
+		ID:          uuid.NewString(),
+		IslandID:    req.IslandID,
+		Name:        req.Name,
+		Description: req.Description,
+	}
+	err := s.learningRepo.CreateModule(module)
+	if err == nil {
+		s.LogActivity(adminID, "CREATE_MODULE", module.ID, fmt.Sprintf("Name: %s", req.Name), ip)
 	}
 	return err
 }
