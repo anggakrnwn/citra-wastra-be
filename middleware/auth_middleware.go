@@ -59,7 +59,12 @@ func AuthMiddleware() gin.HandlerFunc {
 func AdminMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		role, exists := ctx.Get(RoleKey)
-		if !exists || role.(string) != "admin" {
+		roleStr := ""
+		if exists {
+			roleStr = role.(string)
+		}
+
+		if !exists || (roleStr != "admin" && roleStr != "super_admin") {
 			abortWithError(ctx, http.StatusForbidden, "access denied: admin role required")
 			return
 		}
