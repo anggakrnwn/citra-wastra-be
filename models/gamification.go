@@ -15,6 +15,7 @@ type Module struct {
 	IslandID    string  `gorm:"index" json:"island_id"`
 	Name        string  `gorm:"not null" json:"name"`
 	Description string  `json:"description"`
+	ImageURL    string  `json:"image_url"`
 	Levels      []Level `gorm:"foreignKey:ModuleID" json:"levels,omitempty"`
 }
 

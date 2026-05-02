@@ -6,6 +6,7 @@ import (
 	"citra-wastra-be/repository"
 	"context"
 	"fmt"
+	"mime/multipart"
 
 	"github.com/google/uuid"
 )
@@ -39,6 +40,7 @@ type AdminService interface {
 	GetAllUsers(page, limit int) ([]dto.AdminUserResponse, int64, error)
 	GetDetectionLogs(page, limit int) ([]models.Batik, int64, error)
 	GetSystemHealth(ctx context.Context) (dto.AdminSystemHealthResponse, error)
+	UploadImage(ctx context.Context, file *multipart.FileHeader) (string, error)
 }
 
 type adminService struct {
@@ -48,6 +50,7 @@ type adminService struct {
 	badgeRepo    repository.BadgeRepository
 	systemRepo   repository.SystemRepository
 	queueRepo    repository.QueueRepository
+	uploader     ImageUploader
 }
 
 func NewAdminService(
@@ -57,8 +60,17 @@ func NewAdminService(
 	badgeRepo repository.BadgeRepository,
 	systemRepo repository.SystemRepository,
 	queueRepo repository.QueueRepository,
+	uploader ImageUploader,
 ) AdminService {
-	return &adminService{userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo}
+	return &adminService{
+		userRepo:     userRepo,
+		learningRepo: learningRepo,
+		batikRepo:    batikRepo,
+		badgeRepo:    badgeRepo,
+		systemRepo:   systemRepo,
+		queueRepo:    queueRepo,
+		uploader:     uploader,
+	}
 }
 
 func (s *adminService) LogActivity(adminID, action, target, details, ip string) {
@@ -118,6 +130,7 @@ func (s *adminService) CreateModule(adminID, ip string, req dto.AdminModuleReque
 		IslandID:    req.IslandID,
 		Name:        req.Name,
 		Description: req.Description,
+		ImageURL:    req.ImageURL,
 	}
 	err := s.learningRepo.CreateModule(module)
 	if err == nil {
@@ -290,4 +303,13 @@ func (s *adminService) GetSystemHealth(ctx context.Context) (dto.AdminSystemHeal
 		Cloudinary:   "active",
 		APIStats:     stats,
 	}, nil
+}
+
+func (s *adminService) UploadImage(ctx context.Context, file *multipart.FileHeader) (string, error) {
+	folder := "admin-uploads"
+	url, err := s.uploader.UploadImage(ctx, file, folder)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
 }

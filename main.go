@@ -54,7 +54,7 @@ func main() {
 	gamificationService := service.NewGamificationService(badgeRepo, gamificationRepo, userRepo, rdb)
 	authService := service.NewAuthService(userRepo)
 	learningService := service.NewLearningService(learningRepo, queueRepo)
-	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo)
+	adminService := service.NewAdminService(userRepo, learningRepo, batikRepo, badgeRepo, systemRepo, queueRepo, uploader)
 	superAdminService := service.NewSuperAdminService(userRepo, systemRepo, queueRepo, learningRepo, badgeRepo)
 	chatbotService := service.NewChatbotService(client, modelID)
 	batikService := service.NewBatikService(

@@ -14,6 +14,7 @@ type AdminModuleRequest struct {
 	IslandID    string `json:"island_id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
+	ImageURL    string `json:"image_url"`
 }
 
 type AdminQuestionRequest struct {
