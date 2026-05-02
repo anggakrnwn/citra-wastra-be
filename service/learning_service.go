@@ -6,6 +6,8 @@ import (
 	"citra-wastra-be/repository"
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type LearningService interface {
@@ -75,6 +77,10 @@ func (s *learningService) GetIslandModulesWithProgress(userID string, islandID s
 }
 
 func (s *learningService) CompleteLevel(userID string, levelID string) error {
+	if _, err := uuid.Parse(levelID); err != nil {
+		return fmt.Errorf("invalid level id format")
+	}
+
 	level, err := s.learningRepo.GetLevelByID(levelID)
 	if err != nil {
 		return fmt.Errorf("level not found: %v", err)
@@ -98,6 +104,9 @@ func (s *learningService) CompleteLevel(userID string, levelID string) error {
 }
 
 func (s *learningService) GetLevelDetail(levelID string) (models.Level, []models.Question, error) {
+	if _, err := uuid.Parse(levelID); err != nil {
+		return models.Level{}, nil, fmt.Errorf("invalid level id format")
+	}
 	level, err := s.learningRepo.GetLevelByID(levelID)
 	if err != nil {
 		return models.Level{}, nil, err
@@ -107,6 +116,9 @@ func (s *learningService) GetLevelDetail(levelID string) (models.Level, []models
 }
 
 func (s *learningService) SubmitQuiz(userID string, levelID string, isCheating bool, score int) error {
+	if _, err := uuid.Parse(levelID); err != nil {
+		return fmt.Errorf("invalid level id format")
+	}
 	_, err := s.learningRepo.GetProgress(userID, levelID)
 	if err != nil {
 		return fmt.Errorf("you must complete the level content before taking the quiz")
