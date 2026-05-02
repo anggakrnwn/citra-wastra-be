@@ -49,6 +49,7 @@ func SetupRoutes(
 			protected.POST("/batik/detect", batikHandler.Detect)
 			protected.GET("/profile/badges", gamificationHandler.GetMyBadges)
 			protected.POST("/profile/badges/equip", gamificationHandler.EquipBadge)
+			protected.GET("/learning/levels/:id", learningHandler.GetLevelDetail)
 			protected.POST("/learning/levels/:id/complete", learningHandler.CompleteLevel)
 			protected.POST("/learning/levels/:id/quiz", learningHandler.SubmitQuiz)
 

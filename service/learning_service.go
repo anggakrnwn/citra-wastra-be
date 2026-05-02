@@ -14,6 +14,7 @@ type LearningService interface {
 	CompleteLevel(userID string, levelID string) error
 	GetLevelDetail(levelID string) (models.Level, []models.Question, error)
 	SubmitQuiz(userID string, levelID string, isCheating bool, score int) error
+	GetIslandModulesWithProgress(userID string, islandID string) ([]dto.ModuleWithProgress, error)
 }
 
 type learningService struct {
@@ -31,6 +32,46 @@ func (s *learningService) GetAllIslands() ([]models.Island, error) {
 
 func (s *learningService) GetModulesByIsland(islandID string) ([]models.Module, error) {
 	return s.learningRepo.GetModulesByIsland(islandID)
+}
+
+func (s *learningService) GetIslandModulesWithProgress(userID string, islandID string) ([]dto.ModuleWithProgress, error) {
+	modules, err := s.learningRepo.GetModulesByIsland(islandID)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []dto.ModuleWithProgress
+	for _, m := range modules {
+		var levelsWithProgress []dto.LevelWithProgress
+
+		levels, _ := s.learningRepo.GetLevelsByModule(m.ID)
+
+		lastCompleted := true
+		for i, l := range levels {
+			progress, _ := s.learningRepo.GetProgress(userID, l.ID)
+			isCompleted := progress != nil
+
+			isLocked := !lastCompleted
+			if i == 0 {
+				isLocked = false
+			}
+
+			levelsWithProgress = append(levelsWithProgress, dto.LevelWithProgress{
+				Level:       l,
+				IsCompleted: isCompleted,
+				IsLocked:    isLocked,
+			})
+
+			lastCompleted = isCompleted
+		}
+
+		result = append(result, dto.ModuleWithProgress{
+			Module:             m,
+			LevelsWithProgress: levelsWithProgress,
+		})
+	}
+
+	return result, nil
 }
 
 func (s *learningService) CompleteLevel(userID string, levelID string) error {
