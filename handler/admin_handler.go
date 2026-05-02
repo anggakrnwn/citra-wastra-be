@@ -269,10 +269,26 @@ func (h *AdminHandler) GetDetectionLogs(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetSystemHealth(c *gin.Context) {
-	res, err := h.service.GetSystemHealth(c.Request.Context())
+	health, err := h.service.GetSystemHealth(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": res})
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": health})
+}
+
+func (h *AdminHandler) UploadImage(c *gin.Context) {
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "image is required"})
+		return
+	}
+
+	url, err := h.service.UploadImage(c.Request.Context(), file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "url": url})
 }

@@ -93,7 +93,7 @@ func SetupRoutes(
 		superAdmin := api.Group("/super-admin")
 		superAdmin.Use(middleware.AuthMiddleware(), middleware.SuperAdminMiddleware())
 		{
-			// Admin & User Management
+			superAdmin.POST("/upload", adminHandler.UploadImage)
 			superAdmin.POST("/admins", superAdminHandler.CreateAdmin)
 			superAdmin.PUT("/users/:id/status", superAdminHandler.UpdateUserStatus)
 			superAdmin.PUT("/users/:id/role", superAdminHandler.UpdateUserRole)
