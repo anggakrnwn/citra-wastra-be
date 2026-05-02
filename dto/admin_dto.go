@@ -10,6 +10,12 @@ type AdminLevelRequest struct {
 	XPReward int    `json:"xp_reward"`
 }
 
+type AdminModuleRequest struct {
+	IslandID    string `json:"island_id" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+}
+
 type AdminQuestionRequest struct {
 	LevelID  string `json:"level_id" binding:"required"`
 	Question string `json:"question" binding:"required"`

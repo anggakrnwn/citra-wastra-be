@@ -63,6 +63,23 @@ func (h *AdminHandler) DeleteLevel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "level deleted successfully"})
 }
 
+// CMS - Modules
+func (h *AdminHandler) CreateModule(c *gin.Context) {
+	adminID := c.GetString("user_id")
+	ip := c.ClientIP()
+
+	var req dto.AdminModuleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	if err := h.service.CreateModule(adminID, ip, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"success": true, "message": "module created successfully"})
+}
+
 // CMS - Questions
 func (h *AdminHandler) CreateQuestion(c *gin.Context) {
 	adminID := c.GetString("user_id")

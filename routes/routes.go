@@ -65,6 +65,9 @@ func SetupRoutes(
 			admin.PUT("/learning/levels/:id", adminHandler.UpdateLevel)
 			admin.DELETE("/learning/levels/:id", adminHandler.DeleteLevel)
 
+			// CMS Modules
+			admin.POST("/learning/modules", adminHandler.CreateModule)
+
 			// CMS Questions
 			admin.POST("/learning/questions", adminHandler.CreateQuestion)
 			admin.PUT("/learning/questions/:id", adminHandler.UpdateQuestion)
