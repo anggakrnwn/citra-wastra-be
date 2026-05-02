@@ -24,7 +24,10 @@ func InitDB() *gorm.DB {
 		Logger:      logger.Default.LogMode(logger.Info),
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), config)
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), config)
 	if err != nil {
 		log.Fatalf("CRITICAL: Gagal koneksi ke database: %v", err)
 	}
