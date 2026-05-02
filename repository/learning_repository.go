@@ -72,10 +72,7 @@ func (r *learningRepository) DeleteLevel(levelID string) error {
 }
 
 func (r *learningRepository) SaveProgress(progress *models.UserLevelProgress) error {
-	return r.db.FirstOrCreate(progress, models.UserLevelProgress{
-		UserID:  progress.UserID,
-		LevelID: progress.LevelID,
-	}).Error
+	return r.db.Where("user_id = ? AND level_id = ?", progress.UserID, progress.LevelID).FirstOrCreate(progress).Error
 }
 
 func (r *learningRepository) GetProgress(userID string, levelID string) (*models.UserLevelProgress, error) {

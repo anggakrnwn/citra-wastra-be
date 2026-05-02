@@ -29,8 +29,8 @@ type Level struct {
 }
 
 type UserLevelProgress struct {
-	UserID      string    `gorm:"primaryKey" json:"user_id"`
-	LevelID     string    `gorm:"primaryKey" json:"level_id"`
+	UserID      string    `gorm:"primaryKey;type:uuid" json:"user_id"`
+	LevelID     string    `gorm:"primaryKey;type:uuid" json:"level_id"`
 	CompletedAt time.Time `gorm:"autoCreateTime" json:"completed_at"`
 }
 

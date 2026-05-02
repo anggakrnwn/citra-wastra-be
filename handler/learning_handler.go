@@ -4,6 +4,7 @@ import (
 	"citra-wastra-be/middleware"
 	"citra-wastra-be/service"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,7 +68,12 @@ func (h *LearningHandler) CompleteLevel(c *gin.Context) {
 
 	err := h.learningService.CompleteLevel(userID.(string), levelID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		status := http.StatusInternalServerError
+		if strings.Contains(err.Error(), "not found") {
+			status = http.StatusNotFound
+		}
+
+		c.JSON(status, gin.H{
 			"success": false,
 			"error":   err.Error(),
 		})
