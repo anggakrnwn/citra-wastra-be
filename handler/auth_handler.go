@@ -51,7 +51,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			log.Printf("auth register error (email=%s): %v", req.Email, err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
-				"error":   "registration failed",
+				"error":   "registration failed: " + err.Error(),
 			})
 		}
 		return
