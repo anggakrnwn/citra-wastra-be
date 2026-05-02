@@ -16,6 +16,8 @@ type UserResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Role     string `json:"role"`
+	XP       int    `json:"xp"`
+	Level    int    `json:"level"`
 }
 
 type LoginResponse struct {

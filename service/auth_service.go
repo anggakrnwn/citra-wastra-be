@@ -78,6 +78,8 @@ func (s *authService) Register(req dto.RegisterRequest) (dto.LoginResponse, erro
 			Username: user.Username,
 			Email:    user.Email,
 			Role:     user.Role,
+			XP:       user.XP,
+			Level:    user.XP/1000 + 1,
 		},
 	}, nil
 }
@@ -109,6 +111,8 @@ func (s *authService) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 			Username: user.Username,
 			Email:    user.Email,
 			Role:     user.Role,
+			XP:       user.XP,
+			Level:    user.XP/1000 + 1,
 		},
 	}, nil
 }
@@ -176,6 +180,8 @@ func (s *authService) GoogleLogin(ctx context.Context, tokenStr string) (dto.Log
 			Username: user.Username,
 			Email:    user.Email,
 			Role:     user.Role,
+			XP:       user.XP,
+			Level:    user.XP/1000 + 1,
 		},
 	}, nil
 }
@@ -191,5 +197,7 @@ func (s *authService) GetProfile(userID string) (dto.UserResponse, error) {
 		Username: user.Username,
 		Email:    user.Email,
 		Role:     user.Role,
+		XP:       user.XP,
+		Level:    user.XP/1000 + 1,
 	}, nil
 }

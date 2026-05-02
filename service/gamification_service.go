@@ -54,6 +54,8 @@ func (s *gamificationService) SyncUserBadges(userID string, currentXP int) error
 }
 
 func (s *gamificationService) GetBadgeGallery(userID string, currentXP int) (dto.UserProfileBadgeResponse, error) {
+	_ = s.SyncUserBadges(userID, currentXP)
+
 	allBadges, err := s.badgeRepo.GetAllBadges()
 	if err != nil {
 		return dto.UserProfileBadgeResponse{}, err
@@ -93,6 +95,10 @@ func (s *gamificationService) GetBadgeGallery(userID string, currentXP int) (dto
 }
 
 func (s *gamificationService) EquipBadge(userID string, badgeID string) error {
+	ctx := context.Background()
+	xp, _ := s.gamiRepo.GetUserXP(ctx, userID)
+	_ = s.SyncUserBadges(userID, int(xp))
+
 	ownedIDs, err := s.badgeRepo.GetUnlockedBadgeIDs(userID)
 	if err != nil {
 		return fmt.Errorf("failed to check ownership: %v", err)
