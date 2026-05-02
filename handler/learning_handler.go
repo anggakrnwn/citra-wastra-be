@@ -33,17 +33,13 @@ func (h *LearningHandler) GetIslands(c *gin.Context) {
 
 func (h *LearningHandler) GetModules(c *gin.Context) {
 	islandID := c.Param("id")
-	userID, exists := c.Get(middleware.UserIDKey)
-
-	var modules interface{}
-	var err error
-
-	if exists {
-		modules, err = h.learningService.GetIslandModulesWithProgress(userID.(string), islandID)
-	} else {
-		modules, err = h.learningService.GetModulesByIsland(islandID)
+	userID, _ := c.Get(middleware.UserIDKey)
+	uidStr := ""
+	if userID != nil {
+		uidStr = userID.(string)
 	}
 
+	modules, err := h.learningService.GetIslandModulesWithProgress(uidStr, islandID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

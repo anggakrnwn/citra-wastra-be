@@ -40,9 +40,9 @@ func (s *learningService) GetIslandModulesWithProgress(userID string, islandID s
 		return nil, err
 	}
 
-	var result []dto.ModuleWithProgress
+	result := []dto.ModuleWithProgress{}
 	for _, m := range modules {
-		var levelsWithProgress []dto.LevelWithProgress
+		levelsWithProgress := []dto.LevelWithProgress{}
 
 		levels, _ := s.learningRepo.GetLevelsByModule(m.ID)
 
