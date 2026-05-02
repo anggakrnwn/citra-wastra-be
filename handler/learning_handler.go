@@ -33,7 +33,17 @@ func (h *LearningHandler) GetIslands(c *gin.Context) {
 
 func (h *LearningHandler) GetModules(c *gin.Context) {
 	islandID := c.Param("id")
-	modules, err := h.learningService.GetModulesByIsland(islandID)
+	userID, exists := c.Get(middleware.UserIDKey)
+
+	var modules interface{}
+	var err error
+
+	if exists {
+		modules, err = h.learningService.GetIslandModulesWithProgress(userID.(string), islandID)
+	} else {
+		modules, err = h.learningService.GetModulesByIsland(islandID)
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -71,6 +81,24 @@ func (h *LearningHandler) CompleteLevel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "level completed success",
+	})
+}
+
+func (h *LearningHandler) GetLevelDetail(c *gin.Context) {
+	levelID := c.Param("id")
+	level, questions, err := h.learningService.GetLevelDetail(levelID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "level not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":   true,
+		"level":     level,
+		"questions": questions,
 	})
 }
 
