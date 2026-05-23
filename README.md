@@ -1,6 +1,6 @@
 
 # Citra Wastra Backend
-Backend service for Citra Wastra, a batik education & classification platform built with Go.
+Monolith backend service for Citra Wastra, a batik education & classification platform built with Go.
 
 ## Features
 - Authentication with JWT
